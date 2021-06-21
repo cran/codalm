@@ -14,45 +14,41 @@ knitr::opts_chunk$set(
 )
 ```
 
-We will start by loading the `codalm` R package, in addition to the `ggtern` package,
-which we will use to access the data.
+We will start by loading the `codalm` R package, in addition to the `future` and `future.apply` packages,
+which we will use for bootstrapping.
 
 ```{r setup}
 library(codalm)
-library(ggtern)
+require('future')
+require('future.apply')
 ```
 
-We will now load in the data from the ggtern package. We will be analyzing how
-two different methods (image analysis or microscopic inspection) estimate the composition
-of 30 white blood cells. The format that we need is for both compositions to be in matrices,
-with one row per observation. We will also normalize the rows of these matrices to ensure 
+We will now load in the data from the robCompositions package. We will be analyzing how
+the percentages of mothers and fathers with low, medium, and high education levels relate to each other, across 31 countries in Europe. The format that we need is for both compositions to be in matrices, with one row per observation. We will also normalize the rows of these matrices to ensure 
 that they sum to 1, although the `codalm` function would also take care of this for us.
 
 ```{r load_data}
-data("WhiteCells", package = 'ggtern')
-image <- subset(WhiteCells, Experiment == "ImageAnalysis")
-image_mat <- as.matrix(image[,c("G", "L", "M")])
-microscopic <- subset(WhiteCells, Experiment == "MicroscopicInspection")
-microscopic_mat <- as.matrix(microscopic[,c("G", "L", "M")])
-
-image_mat  <- image_mat  / rowSums(image_mat)
-microscopic_mat <- microscopic_mat / rowSums(microscopic_mat)
+data("educFM", package = 'robCompositions')
+father <- as.matrix(educFM[,2:4])
+father <- father / rowSums(father)
+mother <- as.matrix(educFM[,5:7] )
+mother <- mother/rowSums(mother)
 ```
 
 To estimate the coefficient matrix B, we can use the `codalm` function.
 
 ```{r estimate_B}
-B_est <- codalm(y = microscopic_mat, x = image_mat)
+B_est <- codalm(y = father, x = mother)
 B_est
 ```
 
-To see the interpretation of this matrix, please see [Fiksel et al. (2020)](https://arxiv.org/abs/2004.07881). If all the rows of B_est are exactly the same, it is recommended to set `accelerate = FALSE` as a sensitivity check.
+To see the interpretation of this matrix, please see [Fiksel et al. (2021)](https://onlinelibrary.wiley.com/doi/full/10.1111/biom.13465). If all the rows of B_est are exactly the same, it is recommended to set `accelerate = FALSE` as a sensitivity check.
 
 We can also use the bootstrap to estimate 95% confidence intervals. We will
 only use 50 bootstrap iterations as an example (nboot = 50), but is recommended to do more.
 
 ```{r bootstrap}
-B_ci <- codalm_ci(y = microscopic_mat, x = image_mat, nboot = 50,
+B_ci <- codalm_ci(y = father, x = mother, nboot = 50,
                    conf = .95)
 B_ci$ci_L
 B_ci$ci_U
@@ -66,7 +62,7 @@ You can also take advantage of parallelization, if you have multiple cores avail
 ```{r bootstrap_parallel}
 ncores <- 2
 Sys.setenv(R_FUTURE_SUPPORTSMULTICORE_UNSTABLE = "quiet")
-B_ci_parallel <- codalm_ci(y = microscopic_mat, x = image_mat, nboot = 50,
+B_ci_parallel <- codalm_ci(y = father, x = mother, nboot = 50,
                    conf = .95, parallel = TRUE, ncpus = ncores, strategy = 'multisession')
 identical(B_ci$ci_L, B_ci_parallel$ci_L)
 identical(B_ci$ci_U, B_ci_parallel$ci_U)

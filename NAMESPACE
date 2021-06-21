@@ -3,6 +3,7 @@
 export(codalm)
 export(codalm_ci)
 export(codalm_indep_test)
+export(predict_codalm)
 import(future)
 import(future.apply)
 importFrom(SQUAREM,fpiter)

@@ -6,24 +6,22 @@ knitr::opts_chunk$set(
 
 ## ----setup--------------------------------------------------------------------
 library(codalm)
-library(ggtern)
+require('future')
+require('future.apply')
 
 ## ----load_data----------------------------------------------------------------
-data("WhiteCells", package = 'ggtern')
-image <- subset(WhiteCells, Experiment == "ImageAnalysis")
-image_mat <- as.matrix(image[,c("G", "L", "M")])
-microscopic <- subset(WhiteCells, Experiment == "MicroscopicInspection")
-microscopic_mat <- as.matrix(microscopic[,c("G", "L", "M")])
-
-image_mat  <- image_mat  / rowSums(image_mat)
-microscopic_mat <- microscopic_mat / rowSums(microscopic_mat)
+data("educFM", package = 'robCompositions')
+father <- as.matrix(educFM[,2:4])
+father <- father / rowSums(father)
+mother <- as.matrix(educFM[,5:7] )
+mother <- mother/rowSums(mother)
 
 ## ----estimate_B---------------------------------------------------------------
-B_est <- codalm(y = microscopic_mat, x = image_mat)
+B_est <- codalm(y = father, x = mother)
 B_est
 
 ## ----bootstrap----------------------------------------------------------------
-B_ci <- codalm_ci(y = microscopic_mat, x = image_mat, nboot = 50,
+B_ci <- codalm_ci(y = father, x = mother, nboot = 50,
                    conf = .95)
 B_ci$ci_L
 B_ci$ci_U
@@ -31,7 +29,7 @@ B_ci$ci_U
 ## ----bootstrap_parallel-------------------------------------------------------
 ncores <- 2
 Sys.setenv(R_FUTURE_SUPPORTSMULTICORE_UNSTABLE = "quiet")
-B_ci_parallel <- codalm_ci(y = microscopic_mat, x = image_mat, nboot = 50,
+B_ci_parallel <- codalm_ci(y = father, x = mother, nboot = 50,
                    conf = .95, parallel = TRUE, ncpus = ncores, strategy = 'multisession')
 identical(B_ci$ci_L, B_ci_parallel$ci_L)
 identical(B_ci$ci_U, B_ci_parallel$ci_U)

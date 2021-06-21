@@ -54,14 +54,11 @@ and predictors
 }
 \examples{
 \donttest{
-require(ggtern)
-data("WhiteCells", package = 'ggtern')
-image <- subset(WhiteCells, Experiment == "ImageAnalysis")
-image_mat <- as.matrix(image[,c("G", "L", "M")])
-microscopic <- subset(WhiteCells, Experiment == "MicroscopicInspection")
-microscopic_mat <- as.matrix(microscopic[,c("G", "L", "M")])
-x <- image_mat  / rowSums(image_mat)
-y <- microscopic_mat / rowSums(microscopic_mat)
+data("educFM", package = 'robCompositions')
+father <- as.matrix(educFM[,2:4])
+y <- father / rowSums(father)
+mother <- as.matrix(educFM[,5:7] )
+x <- mother/rowSums(mother)
 codalm_ci(y, x, nboot = 50, conf = .95)
 }
 }

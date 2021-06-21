@@ -27,16 +27,13 @@ in Fiksel et al. (2020) for transformation-free linear regression for
 compositional outcomes and predictors.
 }
 \examples{
-require(ggtern)
-data("WhiteCells", package = 'ggtern')
-image <- subset(WhiteCells, Experiment == "ImageAnalysis")
-image_mat <- as.matrix(image[,c("G", "L", "M")])
-microscopic <- subset(WhiteCells, Experiment == "MicroscopicInspection")
-microscopic_mat <- as.matrix(microscopic[,c("G", "L", "M")])
-x <- image_mat  / rowSums(image_mat)
-y <- microscopic_mat / rowSums(microscopic_mat)
+data("educFM", package = 'robCompositions')
+father <- as.matrix(educFM[,2:4])
+y <- father / rowSums(father)
+mother <- as.matrix(educFM[,5:7] )
+x <- mother/rowSums(mother)
 codalm(y, x)
 }
 \references{
-\url{https://arxiv.org/abs/2004.07881}
+\url{https://onlinelibrary.wiley.com/doi/full/10.1111/biom.13465}
 }

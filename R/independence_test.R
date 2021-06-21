@@ -39,14 +39,11 @@ logLikComp <- function(y, x, M) {
 #' codalm_indep_test(y, x)
 #' }
 #'\donttest{
-#' require(ggtern)
-#' data("WhiteCells", package = 'ggtern')
-#' image <- subset(WhiteCells, Experiment == "ImageAnalysis")
-#' image_mat <- as.matrix(image[,c("G", "L", "M")])
-#' microscopic <- subset(WhiteCells, Experiment == "MicroscopicInspection")
-#' microscopic_mat <- as.matrix(microscopic[,c("G", "L", "M")])
-#' x  <- image_mat  / rowSums(image_mat)
-#' y <- microscopic_mat / rowSums(microscopic_mat)
+#' data("educFM", package = 'robCompositions')
+#' father <- as.matrix(educFM[,2:4])
+#' y <- father / rowSums(father)
+#' mother <- as.matrix(educFM[,5:7] )
+#' x <- mother/rowSums(mother)
 #' codalm_indep_test(y, x)
 #' }
 codalm_indep_test <- function(y, x, nperms = 500, accelerate = TRUE,
@@ -101,6 +98,8 @@ codalm_indep_test <- function(y, x, nperms = 500, accelerate = TRUE,
         ll_perm <- logLikComp(y, x_perm, B_perm)
         return(ll_perm - ll_null)
     }, future.seed = init.seed)
+    ### Add observed permutation to the different permutation
+    permut_stats <- c(llr_obs, permut_stats)
     pval <- mean(permut_stats >= llr_obs)
     return(pval)
 }

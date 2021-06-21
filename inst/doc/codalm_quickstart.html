@@ -301,60 +301,44 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<p>We will start by loading the <code>codalm</code> R package, in addition to the <code>ggtern</code> package, which we will use to access the data.</p>
+<p>We will start by loading the <code>codalm</code> R package, in addition to the <code>future</code> and <code>future.apply</code> packages, which we will use for bootstrapping.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(codalm)</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">library</span>(ggtern)</a>
-<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="co">#&gt; Loading required package: ggplot2</span></a>
-<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="co">#&gt; Registered S3 methods overwritten by 'ggtern':</span></a>
-<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co">#&gt;   method           from   </span></a>
-<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="co">#&gt;   grid.draw.ggplot ggplot2</span></a>
-<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="co">#&gt;   plot.ggplot      ggplot2</span></a>
-<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="co">#&gt;   print.ggplot     ggplot2</span></a>
-<a class="sourceLine" id="cb1-9" data-line-number="9"><span class="co">#&gt; --</span></a>
-<a class="sourceLine" id="cb1-10" data-line-number="10"><span class="co">#&gt; Remember to cite, run citation(package = 'ggtern') for further info.</span></a>
-<a class="sourceLine" id="cb1-11" data-line-number="11"><span class="co">#&gt; --</span></a>
-<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="co">#&gt; Attaching package: 'ggtern'</span></a>
-<a class="sourceLine" id="cb1-14" data-line-number="14"><span class="co">#&gt; The following objects are masked from 'package:ggplot2':</span></a>
-<a class="sourceLine" id="cb1-15" data-line-number="15"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb1-16" data-line-number="16"><span class="co">#&gt;     aes, annotate, ggplot, ggplotGrob, ggplot_build, ggplot_gtable,</span></a>
-<a class="sourceLine" id="cb1-17" data-line-number="17"><span class="co">#&gt;     ggsave, layer_data, theme_bw, theme_classic, theme_dark,</span></a>
-<a class="sourceLine" id="cb1-18" data-line-number="18"><span class="co">#&gt;     theme_gray, theme_light, theme_linedraw, theme_minimal, theme_void</span></a></code></pre></div>
-<p>We will now load in the data from the ggtern package. We will be analyzing how two different methods (image analysis or microscopic inspection) estimate the composition of 30 white blood cells. The format that we need is for both compositions to be in matrices, with one row per observation. We will also normalize the rows of these matrices to ensure that they sum to 1, although the <code>codalm</code> function would also take care of this for us.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">data</span>(<span class="st">&quot;WhiteCells&quot;</span>, <span class="dt">package =</span> <span class="st">'ggtern'</span>)</a>
-<a class="sourceLine" id="cb2-2" data-line-number="2">image &lt;-<span class="st"> </span><span class="kw">subset</span>(WhiteCells, Experiment <span class="op">==</span><span class="st"> &quot;ImageAnalysis&quot;</span>)</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3">image_mat &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(image[,<span class="kw">c</span>(<span class="st">&quot;G&quot;</span>, <span class="st">&quot;L&quot;</span>, <span class="st">&quot;M&quot;</span>)])</a>
-<a class="sourceLine" id="cb2-4" data-line-number="4">microscopic &lt;-<span class="st"> </span><span class="kw">subset</span>(WhiteCells, Experiment <span class="op">==</span><span class="st"> &quot;MicroscopicInspection&quot;</span>)</a>
-<a class="sourceLine" id="cb2-5" data-line-number="5">microscopic_mat &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(microscopic[,<span class="kw">c</span>(<span class="st">&quot;G&quot;</span>, <span class="st">&quot;L&quot;</span>, <span class="st">&quot;M&quot;</span>)])</a>
-<a class="sourceLine" id="cb2-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb2-7" data-line-number="7">image_mat  &lt;-<span class="st"> </span>image_mat  <span class="op">/</span><span class="st"> </span><span class="kw">rowSums</span>(image_mat)</a>
-<a class="sourceLine" id="cb2-8" data-line-number="8">microscopic_mat &lt;-<span class="st"> </span>microscopic_mat <span class="op">/</span><span class="st"> </span><span class="kw">rowSums</span>(microscopic_mat)</a></code></pre></div>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">require</span>(<span class="st">'future'</span>)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="co">#&gt; Loading required package: future</span></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="kw">require</span>(<span class="st">'future.apply'</span>)</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co">#&gt; Loading required package: future.apply</span></a></code></pre></div>
+<p>We will now load in the data from the robCompositions package. We will be analyzing how the percentages of mothers and fathers with low, medium, and high education levels relate to each other, across 31 countries in Europe. The format that we need is for both compositions to be in matrices, with one row per observation. We will also normalize the rows of these matrices to ensure that they sum to 1, although the <code>codalm</code> function would also take care of this for us.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">data</span>(<span class="st">&quot;educFM&quot;</span>, <span class="dt">package =</span> <span class="st">'robCompositions'</span>)</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">father &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(educFM[,<span class="dv">2</span><span class="op">:</span><span class="dv">4</span>])</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">father &lt;-<span class="st"> </span>father <span class="op">/</span><span class="st"> </span><span class="kw">rowSums</span>(father)</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">mother &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(educFM[,<span class="dv">5</span><span class="op">:</span><span class="dv">7</span>] )</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">mother &lt;-<span class="st"> </span>mother<span class="op">/</span><span class="kw">rowSums</span>(mother)</a></code></pre></div>
 <p>To estimate the coefficient matrix B, we can use the <code>codalm</code> function.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">B_est &lt;-<span class="st"> </span><span class="kw">codalm</span>(<span class="dt">y =</span> microscopic_mat, <span class="dt">x =</span> image_mat)</a>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">B_est &lt;-<span class="st"> </span><span class="kw">codalm</span>(<span class="dt">y =</span> father, <span class="dt">x =</span> mother)</a>
 <a class="sourceLine" id="cb3-2" data-line-number="2">B_est</a>
-<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="co">#&gt;              [,1]       [,2]         [,3]</span></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="co">#&gt; [1,] 9.742582e-01 0.02292755 2.814241e-03</span></a>
-<a class="sourceLine" id="cb3-5" data-line-number="5"><span class="co">#&gt; [2,] 3.267605e-09 1.00000000 3.620972e-10</span></a>
-<a class="sourceLine" id="cb3-6" data-line-number="6"><span class="co">#&gt; [3,] 9.484137e-18 0.04198815 9.580118e-01</span></a></code></pre></div>
-<p>To see the interpretation of this matrix, please see <a href="https://arxiv.org/abs/2004.07881">Fiksel et al. (2020)</a>. If all the rows of B_est are exactly the same, it is recommended to set <code>accelerate = FALSE</code> as a sensitivity check.</p>
+<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="co">#&gt;              [,1]       [,2]       [,3]</span></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="co">#&gt; [1,] 9.113082e-01 0.05115443 0.03753734</span></a>
+<a class="sourceLine" id="cb3-5" data-line-number="5"><span class="co">#&gt; [2,] 1.427924e-08 0.90541094 0.09458905</span></a>
+<a class="sourceLine" id="cb3-6" data-line-number="6"><span class="co">#&gt; [3,] 1.860624e-07 0.14154036 0.85845945</span></a></code></pre></div>
+<p>To see the interpretation of this matrix, please see <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/biom.13465">Fiksel et al. (2021)</a>. If all the rows of B_est are exactly the same, it is recommended to set <code>accelerate = FALSE</code> as a sensitivity check.</p>
 <p>We can also use the bootstrap to estimate 95% confidence intervals. We will only use 50 bootstrap iterations as an example (nboot = 50), but is recommended to do more.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">B_ci &lt;-<span class="st"> </span><span class="kw">codalm_ci</span>(<span class="dt">y =</span> microscopic_mat, <span class="dt">x =</span> image_mat, <span class="dt">nboot =</span> <span class="dv">50</span>,</a>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">B_ci &lt;-<span class="st"> </span><span class="kw">codalm_ci</span>(<span class="dt">y =</span> father, <span class="dt">x =</span> mother, <span class="dt">nboot =</span> <span class="dv">50</span>,</a>
 <a class="sourceLine" id="cb4-2" data-line-number="2">                   <span class="dt">conf =</span> <span class="fl">.95</span>)</a>
 <a class="sourceLine" id="cb4-3" data-line-number="3">B_ci<span class="op">$</span>ci_L</a>
-<a class="sourceLine" id="cb4-4" data-line-number="4"><span class="co">#&gt;              [,1]       [,2]         [,3]</span></a>
-<a class="sourceLine" id="cb4-5" data-line-number="5"><span class="co">#&gt; [1,] 9.576089e-01 0.01399186 1.156448e-03</span></a>
-<a class="sourceLine" id="cb4-6" data-line-number="6"><span class="co">#&gt; [2,] 2.512029e-15 0.97220006 9.764192e-17</span></a>
-<a class="sourceLine" id="cb4-7" data-line-number="7"><span class="co">#&gt; [3,] 6.197244e-21 0.01165546 9.145955e-01</span></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4"><span class="co">#&gt;              [,1]         [,2]       [,3]</span></a>
+<a class="sourceLine" id="cb4-5" data-line-number="5"><span class="co">#&gt; [1,] 8.398315e-01 1.689452e-02 0.01890371</span></a>
+<a class="sourceLine" id="cb4-6" data-line-number="6"><span class="co">#&gt; [2,] 5.512479e-23 8.310054e-01 0.04690478</span></a>
+<a class="sourceLine" id="cb4-7" data-line-number="7"><span class="co">#&gt; [3,] 1.533253e-13 1.876738e-09 0.64493422</span></a>
 <a class="sourceLine" id="cb4-8" data-line-number="8">B_ci<span class="op">$</span>ci_U</a>
-<a class="sourceLine" id="cb4-9" data-line-number="9"><span class="co">#&gt;              [,1]       [,2]         [,3]</span></a>
-<a class="sourceLine" id="cb4-10" data-line-number="10"><span class="co">#&gt; [1,] 9.837854e-01 0.03981767 4.560504e-03</span></a>
-<a class="sourceLine" id="cb4-11" data-line-number="11"><span class="co">#&gt; [2,] 2.779953e-02 1.00000000 4.198096e-07</span></a>
-<a class="sourceLine" id="cb4-12" data-line-number="12"><span class="co">#&gt; [3,] 3.143104e-06 0.08540455 9.868145e-01</span></a></code></pre></div>
+<a class="sourceLine" id="cb4-9" data-line-number="9"><span class="co">#&gt;            [,1]      [,2]      [,3]</span></a>
+<a class="sourceLine" id="cb4-10" data-line-number="10"><span class="co">#&gt; [1,] 0.95443317 0.1174445 0.0696308</span></a>
+<a class="sourceLine" id="cb4-11" data-line-number="11"><span class="co">#&gt; [2,] 0.04001022 0.9522237 0.1655356</span></a>
+<a class="sourceLine" id="cb4-12" data-line-number="12"><span class="co">#&gt; [3,] 0.16044680 0.3550658 1.0000000</span></a></code></pre></div>
 <p>These matrices given the lower and upper bounds for the confidence interval for each element of the coefficient matrix.</p>
 <p>You can also take advantage of parallelization, if you have multiple cores available.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">ncores &lt;-<span class="st"> </span><span class="dv">2</span></a>
 <a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw">Sys.setenv</span>(<span class="dt">R_FUTURE_SUPPORTSMULTICORE_UNSTABLE =</span> <span class="st">&quot;quiet&quot;</span>)</a>
-<a class="sourceLine" id="cb5-3" data-line-number="3">B_ci_parallel &lt;-<span class="st"> </span><span class="kw">codalm_ci</span>(<span class="dt">y =</span> microscopic_mat, <span class="dt">x =</span> image_mat, <span class="dt">nboot =</span> <span class="dv">50</span>,</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">B_ci_parallel &lt;-<span class="st"> </span><span class="kw">codalm_ci</span>(<span class="dt">y =</span> father, <span class="dt">x =</span> mother, <span class="dt">nboot =</span> <span class="dv">50</span>,</a>
 <a class="sourceLine" id="cb5-4" data-line-number="4">                   <span class="dt">conf =</span> <span class="fl">.95</span>, <span class="dt">parallel =</span> <span class="ot">TRUE</span>, <span class="dt">ncpus =</span> ncores, <span class="dt">strategy =</span> <span class="st">'multisession'</span>)</a>
 <a class="sourceLine" id="cb5-5" data-line-number="5"><span class="kw">identical</span>(B_ci<span class="op">$</span>ci_L, B_ci_parallel<span class="op">$</span>ci_L)</a>
 <a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co">#&gt; [1] TRUE</span></a>
@@ -367,14 +351,14 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <a class="sourceLine" id="cb6-4" data-line-number="4">indep_test_pval &lt;-<span class="st"> </span><span class="kw">codalm_indep_test</span>(<span class="dt">y =</span> y, <span class="dt">x =</span> x,</a>
 <a class="sourceLine" id="cb6-5" data-line-number="5">                                     <span class="dt">nperms =</span> <span class="dv">100</span>, <span class="dt">init.seed =</span> <span class="dv">123</span>)</a>
 <a class="sourceLine" id="cb6-6" data-line-number="6">indep_test_pval</a>
-<a class="sourceLine" id="cb6-7" data-line-number="7"><span class="co">#&gt; [1] 0.28</span></a></code></pre></div>
+<a class="sourceLine" id="cb6-7" data-line-number="7"><span class="co">#&gt; [1] 0.2871287</span></a></code></pre></div>
 <p>This function can also be parallelized. Unlike the bootstrapping, there is no need to differentiate between whether the user is using a Windows or Unix system.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">indep_test_pval_parallel &lt;-<span class="st"> </span><span class="kw">codalm_indep_test</span>(<span class="dt">y =</span> y, <span class="dt">x =</span> x,</a>
 <a class="sourceLine" id="cb7-2" data-line-number="2">                                              <span class="dt">nperms =</span> <span class="dv">100</span>, <span class="dt">init.seed =</span> <span class="dv">123</span>,</a>
 <a class="sourceLine" id="cb7-3" data-line-number="3">                                              <span class="dt">parallel =</span> <span class="ot">TRUE</span>, <span class="dt">ncpus =</span> ncores,</a>
 <a class="sourceLine" id="cb7-4" data-line-number="4">                                              <span class="dt">strategy =</span> <span class="st">'multisession'</span>)</a>
 <a class="sourceLine" id="cb7-5" data-line-number="5">indep_test_pval_parallel</a>
-<a class="sourceLine" id="cb7-6" data-line-number="6"><span class="co">#&gt; [1] 0.28</span></a></code></pre></div>
+<a class="sourceLine" id="cb7-6" data-line-number="6"><span class="co">#&gt; [1] 0.2871287</span></a></code></pre></div>
 
 
 

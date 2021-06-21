@@ -53,7 +53,7 @@ compreg.loglik <- function(pars, A, G, D1, D2) {
 #' @param accelerate A logical variable, indicating whether or not to use the
 #' Squarem algorithm for acceleration of the EM algorithm. Default is TRUE.
 #'
-#' @references \url{https://arxiv.org/abs/2004.07881}
+#' @references \url{https://onlinelibrary.wiley.com/doi/full/10.1111/biom.13465}
 #'
 #' @return A \eqn{D_s} x \eqn{D_r} compositional coefficient matrix, where
 #' \eqn{D_s} and \eqn{D_r}  are the dimensions of the compositional predictor
@@ -61,14 +61,11 @@ compreg.loglik <- function(pars, A, G, D1, D2) {
 #' @export
 #' @importFrom SQUAREM squarem fpiter
 #' @examples
-#' require(ggtern)
-#' data("WhiteCells", package = 'ggtern')
-#' image <- subset(WhiteCells, Experiment == "ImageAnalysis")
-#' image_mat <- as.matrix(image[,c("G", "L", "M")])
-#' microscopic <- subset(WhiteCells, Experiment == "MicroscopicInspection")
-#' microscopic_mat <- as.matrix(microscopic[,c("G", "L", "M")])
-#' x <- image_mat  / rowSums(image_mat)
-#' y <- microscopic_mat / rowSums(microscopic_mat)
+#' data("educFM", package = 'robCompositions')
+#' father <- as.matrix(educFM[,2:4])
+#' y <- father / rowSums(father)
+#' mother <- as.matrix(educFM[,5:7] )
+#' x <- mother/rowSums(mother)
 #' codalm(y, x)
 codalm <- function(y, x, accelerate = TRUE) {
     Nout <- nrow(y)
@@ -97,6 +94,32 @@ codalm <- function(y, x, accelerate = TRUE) {
     B_est <- em_output$par
     dim(B_est) <- c(D2, D1)
     return(B_est)
+}
+
+#' @title Prediction for Transformation-free Linear Regression for Compositional Outcomes and Predictors
+#'
+#' @description Obtains compositional predictions for new compositional covariates using
+#' an established codalm model.
+#'
+#' @param object A \code{codalm} model
+#' @param newx A matrix of compositional predictors. Each row is an observation, and must sum to 1.
+#' If any rows do not sum to 1, they will be renormalized
+#'
+#' @return A \eqn{D_s} x \eqn{D_r} compositional coefficient matrix, where
+#' \eqn{D_s} and \eqn{D_r}  are the dimensions of the compositional predictor
+#' and outcome, respectively
+#' @export
+#' @examples
+#' data("educFM", package = 'robCompositions')
+#' father <- as.matrix(educFM[,2:4])
+#' y <- father / rowSums(father)
+#' mother <- as.matrix(educFM[,5:7] )
+#' x <- mother/rowSums(mother)
+#' codalm_model <- codalm(y[1:20,], x[1:20,])
+#' predict_codalm(codalm_model, x[-(1:20),])
+predict_codalm <- function(object, newx) {
+    y <- newx %*% object
+    return(y)
 }
 
 codalm_boot_fn <- function(y, x, indices, accelerate) {
@@ -139,14 +162,11 @@ codalm_boot_fn <- function(y, x, indices, accelerate) {
 #' @importFrom stats quantile
 #' @examples
 #' \donttest{
-#' require(ggtern)
-#' data("WhiteCells", package = 'ggtern')
-#' image <- subset(WhiteCells, Experiment == "ImageAnalysis")
-#' image_mat <- as.matrix(image[,c("G", "L", "M")])
-#' microscopic <- subset(WhiteCells, Experiment == "MicroscopicInspection")
-#' microscopic_mat <- as.matrix(microscopic[,c("G", "L", "M")])
-#' x <- image_mat  / rowSums(image_mat)
-#' y <- microscopic_mat / rowSums(microscopic_mat)
+#' data("educFM", package = 'robCompositions')
+#' father <- as.matrix(educFM[,2:4])
+#' y <- father / rowSums(father)
+#' mother <- as.matrix(educFM[,5:7] )
+#' x <- mother/rowSums(mother)
 #' codalm_ci(y, x, nboot = 50, conf = .95)
 #' }
 codalm_ci <- function(y, x, accelerate = TRUE, nboot = 500, conf = .95,
