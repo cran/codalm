@@ -10,7 +10,7 @@ require('future')
 require('future.apply')
 
 ## ----load_data----------------------------------------------------------------
-data("educFM", package = 'robCompositions')
+data("educFM")
 father <- as.matrix(educFM[,2:4])
 father <- father / rowSums(father)
 mother <- as.matrix(educFM[,5:7] )
@@ -28,7 +28,6 @@ B_ci$ci_U
 
 ## ----bootstrap_parallel-------------------------------------------------------
 ncores <- 2
-Sys.setenv(R_FUTURE_SUPPORTSMULTICORE_UNSTABLE = "quiet")
 B_ci_parallel <- codalm_ci(y = father, x = mother, nboot = 50,
                    conf = .95, parallel = TRUE, ncpus = ncores, strategy = 'multisession')
 identical(B_ci$ci_L, B_ci_parallel$ci_L)

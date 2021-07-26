@@ -61,7 +61,7 @@ compreg.loglik <- function(pars, A, G, D1, D2) {
 #' @export
 #' @importFrom SQUAREM squarem fpiter
 #' @examples
-#' data("educFM", package = 'robCompositions')
+#' data("educFM")
 #' father <- as.matrix(educFM[,2:4])
 #' y <- father / rowSums(father)
 #' mother <- as.matrix(educFM[,5:7] )
@@ -110,7 +110,7 @@ codalm <- function(y, x, accelerate = TRUE) {
 #' and outcome, respectively
 #' @export
 #' @examples
-#' data("educFM", package = 'robCompositions')
+#' data("educFM")
 #' father <- as.matrix(educFM[,2:4])
 #' y <- father / rowSums(father)
 #' mother <- as.matrix(educFM[,5:7] )
@@ -162,7 +162,7 @@ codalm_boot_fn <- function(y, x, indices, accelerate) {
 #' @importFrom stats quantile
 #' @examples
 #' \donttest{
-#' data("educFM", package = 'robCompositions')
+#' data("educFM")
 #' father <- as.matrix(educFM[,2:4])
 #' y <- father / rowSums(father)
 #' mother <- as.matrix(educFM[,5:7] )

@@ -22,7 +22,7 @@ Obtains compositional predictions for new compositional covariates using
 an established codalm model.
 }
 \examples{
-data("educFM", package = 'robCompositions')
+data("educFM")
 father <- as.matrix(educFM[,2:4])
 y <- father / rowSums(father)
 mother <- as.matrix(educFM[,5:7] )

@@ -23,12 +23,10 @@ require('future')
 require('future.apply')
 ```
 
-We will now load in the data from the robCompositions package. We will be analyzing how
-the percentages of mothers and fathers with low, medium, and high education levels relate to each other, across 31 countries in Europe. The format that we need is for both compositions to be in matrices, with one row per observation. We will also normalize the rows of these matrices to ensure 
-that they sum to 1, although the `codalm` function would also take care of this for us.
+We will be analyzing how the percentages of mothers and fathers with low, medium, and high education levels relate to each other, across 31 countries in Europe. The format that we need is for both compositions to be in matrices, with one row per observation. We will also normalize the rows of these matrices to ensure that they sum to 1, although the `codalm` function would also take care of this for us.
 
 ```{r load_data}
-data("educFM", package = 'robCompositions')
+data("educFM")
 father <- as.matrix(educFM[,2:4])
 father <- father / rowSums(father)
 mother <- as.matrix(educFM[,5:7] )
@@ -61,7 +59,6 @@ You can also take advantage of parallelization, if you have multiple cores avail
 
 ```{r bootstrap_parallel}
 ncores <- 2
-Sys.setenv(R_FUTURE_SUPPORTSMULTICORE_UNSTABLE = "quiet")
 B_ci_parallel <- codalm_ci(y = father, x = mother, nboot = 50,
                    conf = .95, parallel = TRUE, ncpus = ncores, strategy = 'multisession')
 identical(B_ci$ci_L, B_ci_parallel$ci_L)

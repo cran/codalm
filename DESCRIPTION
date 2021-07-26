@@ -2,7 +2,7 @@ Package: codalm
 Type: Package
 Title: Transformation-Free Linear Regression for Compositional Outcomes
         and Predictors
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: 
     c(person(given = "Jacob",
              family = "Fiksel",
@@ -22,12 +22,14 @@ Imports: SQUAREM (>= 2020.3), future, future.apply
 Encoding: UTF-8
 URL: https://github.com/jfiksel/codalm
 BugReports: https://github.com/jfiksel/codalm/issues
-RoxygenNote: 7.1.0
-Suggests: knitr, robCompositions, gtools, remotes, testthat, markdown
+RoxygenNote: 7.1.1
+Suggests: knitr, gtools, remotes, testthat, rmarkdown
 VignetteBuilder: knitr
+Depends: R (>= 2.10)
+LazyData: true
 NeedsCompilation: no
-Packaged: 2021-06-21 18:57:47 UTC; jfiksel
+Packaged: 2021-07-26 17:25:48 UTC; jfiksel
 Author: Jacob Fiksel [aut, cre] (<https://orcid.org/0000-0001-7067-1334>),
   Abhirup Datta [aut]
 Repository: CRAN
-Date/Publication: 2021-06-21 19:20:02 UTC
+Date/Publication: 2021-07-26 18:40:02 UTC
